@@ -1,0 +1,585 @@
+#include <iostream>
+
+struct Node
+{
+    int data;
+    Node *next;
+};
+
+// insert any way (if ind > length) and return head
+struct Node *InsertSorted(struct Node *head, int data)
+{
+    struct Node *node = new struct Node;
+    node->data = data;
+    // head is NULL
+    if (!head)
+    {
+        node->next = NULL;
+        return node;
+    }
+    // data < head->data
+    if (data < head->data)
+    {
+        node->next = head;
+        return node;
+    }
+    // data >= head->data
+    struct Node *prev = head;
+    while (prev->next)
+    {
+        if (data < prev->next->data)
+        {
+            node->next = prev->next;
+            prev->next = node;
+            return head;
+        }
+        prev = prev->next;
+    }
+    // data > any element data
+    prev->next = node;
+    node->next = NULL;
+    return head;
+}
+
+// insert any way (if ind > length) and return head
+struct Node *Insert(struct Node *head, int ind, int data)
+{
+    struct Node *node = new struct Node;
+    node->data = data;
+    // head is NULL
+    if (!head)
+    {
+        node->next = NULL;
+        return node;
+    }
+    // ind = 0
+    if (ind == 0)
+    {
+        node->next = head;
+        return node;
+    }
+    // ind > 0
+    int cnt = 1;
+    struct Node *prev = head;
+    while (prev->next)
+    {
+        if (cnt == ind)
+        {
+            node->next = prev->next;
+            prev->next = node;
+            return head;
+        }
+        cnt++;
+        prev = prev->next;
+    }
+    // ind > lenght
+    prev->next = node;
+    node->next = NULL;
+    return head;
+}
+
+struct Node *CreateSortedFromArray(int *arr, int size)
+{
+    if (size < 1 || arr == NULL)
+        return NULL;
+    struct Node *head = NULL;
+    for (int i = 0; i < size; i++)
+    {
+        head = InsertSorted(head, arr[i]);
+    }
+    return head;
+}
+
+struct Node *InsertLast(struct Node *head, int data)
+{
+    return Insert(head, INT_MAX, data);
+}
+
+struct Node *CreateFromArrayByInsert(int *arr, int size)
+{
+    if (size < 1 || arr == NULL)
+        return NULL;
+    struct Node *head = NULL;
+    for (int i = 0; i < size; i++)
+    {
+        head = InsertLast(head, arr[i]);
+    }
+    return head;
+}
+
+struct Node *CreateFromArray(int *arr, int size)
+{
+    if (size < 1 || arr == NULL)
+        return NULL;
+    struct Node *root = new struct Node;
+    struct Node *node = root;
+    node->data = arr[0];
+    for (int i = 1; i < size; i++)
+    {
+        node->next = new struct Node;
+        node = node->next;
+        node->data = arr[i];
+    }
+    node->next = NULL;
+    return root;
+}
+
+// delete any way (if ind > length, delete last) and return head
+struct Node *Delete(struct Node *head, int ind)
+{
+    // head is NULL
+    if (!head)
+        return NULL;
+    // ind = 0
+    if (ind == 0)
+    {
+        struct Node *temp = head;
+        head = head->next;
+        delete temp;
+        return head;
+    }
+    // ind > 0
+    int cnt = 1;
+    struct Node *prev = head;
+    while (prev->next)
+    {
+        if (cnt == ind)
+        {
+            struct Node *temp = prev->next;
+            prev->next = prev->next->next;
+            delete temp;
+            return head;
+        }
+        // check if prev is before last
+        if (!prev->next->next)
+        {
+            // delete last
+            delete prev->next;
+            prev->next = NULL;
+            return head;
+        }
+        cnt++;
+        prev = prev->next;
+    }
+}
+
+struct Node *DeleteLast(struct Node *head)
+{
+    return Delete(head, INT_MAX);
+}
+
+void FreeLinkedList(struct Node *&node)
+{
+    if (!node)
+        return;
+    while (node)
+    {
+        struct Node *prev = node;
+        node = node->next;
+        delete prev;
+    }
+    node = NULL;
+}
+
+struct Node *SearchRecursive(struct Node *&node, int &key)
+{
+    if (!node)
+        return NULL;
+    if (node->data == key)
+        return node;
+    return SearchRecursive(node->next, key);
+}
+
+struct Node *Search(struct Node *&head, int &key)
+{
+    struct Node *node = head;
+    while (node)
+    {
+        if (node->data == key)
+            return node;
+        node = node->next;
+    }
+    return NULL;
+}
+
+struct Node *SearchWithMoveToHead(struct Node *&head, int &key)
+{
+    if (head->data == key)
+        return head;
+    struct Node *node = head->next;
+    struct Node *prev = head;
+    while (node)
+    {
+        if (node->data == key)
+        {
+            // prev link to next after node
+            prev->next = node->next;
+            // node link to current first
+            node->next = head;
+            // change head
+            head = node;
+            return node;
+        }
+        prev = node;
+        node = node->next;
+    }
+    return NULL;
+}
+
+int MaxElementRecursive(struct Node *&node)
+{
+    if (!node)
+        return INT_MIN;
+    static int currMax;
+    currMax = MaxElementRecursive(node->next);
+    return currMax > node->data ? currMax : node->data;
+}
+
+int MaxElement(struct Node *&_node)
+{
+    int max = INT_MIN;
+    struct Node *node = _node;
+    while (node)
+    {
+        if (max < node->data)
+            max = node->data;
+        node = node->next;
+    }
+    return max;
+}
+
+int CountRecursive(struct Node *node)
+{
+    if (!node)
+        return 0;
+    return CountRecursive(node->next) + 1;
+}
+
+int Count(struct Node *node)
+{
+    int cnt = 0;
+    while (node)
+    {
+        cnt++;
+        node = node->next;
+    }
+    return cnt;
+}
+
+int SumRecursive(struct Node *node)
+{
+    if (!node)
+        return 0;
+    return SumRecursive(node->next) + node->data;
+}
+
+int Sum(struct Node *node)
+{
+    int sum = 0;
+    while (node)
+    {
+        sum += node->data;
+        node = node->next;
+    }
+    return sum;
+}
+
+bool IsSorted(struct Node *head)
+{
+    if (!head)
+        return false;
+    // 1 element in list
+    if (!head->next)
+        return true;
+    // >1
+    struct Node *node = head;
+    while (node->next)
+    {
+        if (node->data > node->next->data)
+            return false;
+        node = node->next;
+    }
+    return true;
+}
+
+void RemoveDuplicatesFormSorted(struct Node *head)
+{
+    if (!head)
+        return;
+    // 1 element in list
+    if (!head->next)
+        return;
+    struct Node *node = head;
+    while (node && node->next)
+    {
+        if (node->data == node->next->data)
+        {
+            struct Node *temp = node->next;
+            node->next = node->next->next;
+            delete temp;
+        }
+        else
+            node = node->next;
+    }
+    return;
+}
+
+struct Node *ReverseByMoveData(struct Node *head)
+{
+    if (!head)
+        return NULL;
+    // 1 element in list
+    if (!head->next)
+        return head;
+    // create auxilary array
+    int *arr = new int[Count(head)];
+    // fill array by data
+    struct Node *node = head;
+    int i = 0;
+    while (node)
+    {
+        arr[i] = node->data;
+        i++;
+        node = node->next;
+    }
+    // fill ll by array data
+    node = head;
+    i--;
+    while (node)
+    {
+        node->data = arr[i];
+        i--;
+        node = node->next;
+    }
+    delete[] arr;
+    return head;
+}
+
+struct Node *ReverseByMoveLinks(struct Node *head)
+{
+    if (!head)
+        return NULL;
+    // 1 element in list
+    if (!head->next)
+        return head;
+    // > 1
+    struct Node *node0 = NULL;
+    struct Node *node1 = NULL;
+    struct Node *node2 = head;
+    while (node2)
+    {
+        node0 = node1;
+        node1 = node2;
+        node2 = node2->next;
+        node1->next = node0; //!!!
+    }
+    return node1;
+}
+
+struct Node *ReverseByMoveLinksRecursive(struct Node *prev, struct Node *node)
+{
+    if (!node)
+        return prev;
+    // traverse head from last element
+    struct Node *head = ReverseByMoveLinksRecursive(node, node->next);
+    node->next = prev;
+    return head;
+}
+
+void PrintRecursive(const struct Node *node)
+{
+    if (!node)
+    {
+        std::cout << std::endl;
+        return;
+    }
+    std::cout << node->data << " ";
+    PrintRecursive(node->next);
+}
+
+std::ostream &operator<<(std::ostream &os, struct Node *node)
+{
+    while (node)
+    {
+        os << node->data << " ";
+        node = node->next;
+    }
+    return os;
+}
+
+struct Node *Concat(struct Node *headFirst, struct Node *headSecond)
+{
+    // go to the and of first LL
+    struct Node *node = headFirst;
+    while (node->next)
+        node = node->next;
+    // change nullptr to headB
+    node->next = headSecond;
+    return headFirst;
+}
+
+struct Node *MergeSorted(struct Node *first, struct Node *second)
+{
+    struct Node *head;
+    // get head
+    if (first->data < second->data)
+    {
+        head = first;
+        first = first->next;
+    }
+    else
+    {
+        head = second;
+        second = second->next;
+    }
+    // merge
+    struct Node *node = head;
+    while (first && second)
+    {
+        if (first->data < second->data)
+        {
+            node->next = first;
+            first = first->next;
+        }
+        else
+        {
+            node->next = second;
+            second = second->next;
+        }
+        node = node->next;
+    }
+    // concat with remain (if exists)
+    if (first)
+        node->next = first;
+    else
+        node->next = second;
+    return head;
+}
+
+bool IsLoop(struct Node *head)
+{
+    if (!head)
+        return false;
+    struct Node *fast = head;
+    struct Node *slow = head;
+    while (fast->next && fast->next->next)
+    {
+        fast = fast->next->next;
+        slow = slow->next;
+        if (fast == slow)
+            return true;
+    }
+    return false;
+}
+
+bool MakeLoop(struct Node *head, int loopStart)
+{
+    if (!head)
+        return false;
+    int cnt = 0;
+    struct Node *node = head;
+    struct Node *loopFirst = NULL;
+    while (node->next)
+    {
+        if (cnt == loopStart)
+            loopFirst = node;
+        node = node->next;
+        cnt++;
+    }
+    if (loopFirst)
+    {
+        node->next = loopFirst;
+        return true;
+    }
+    return false;
+}
+
+int main()
+{
+    printf("MAIN START\n\r");
+    int arr[] = {10, 20, 30, 40, 150, 60, 70};
+    struct Node *root = CreateFromArray(arr, sizeof(arr) / sizeof(arr[0]));
+    std::cout << root << std::endl;
+    PrintRecursive(root);
+    std::cout << "cnt=" << Count(root) << std::endl;
+    std::cout << "cnt=" << CountRecursive(root) << std::endl;
+    std::cout << "sum=" << Sum(root) << std::endl;
+    std::cout << "sum=" << SumRecursive(root) << std::endl;
+    std::cout << "max=" << MaxElement(root) << std::endl;
+    std::cout << "max=" << MaxElementRecursive(root) << std::endl;
+    int key = 150;
+    struct Node *node = Search(root, key);
+    std::cout << "search(150) node ptr=" << (void *)node << " node->data=" << (node ? node->data : NULL) << std::endl;
+    node = SearchRecursive(root, key);
+    std::cout << "search(150) node ptr=" << (void *)node << " node->data=" << (node ? node->data : NULL) << std::endl;
+    node = SearchWithMoveToHead(root, key);
+    std::cout << "search(150) node ptr=" << (void *)node << " node->data=" << (node ? node->data : NULL) << std::endl;
+    PrintRecursive(root);
+    node = SearchWithMoveToHead(root, key);
+    std::cout << "search(150) node ptr=" << (void *)node << " node->data=" << (node ? node->data : NULL) << std::endl;
+    struct Node *headInsert = Insert(node, 3, 88);
+    PrintRecursive(headInsert);
+    FreeLinkedList(root);
+    PrintRecursive(root);
+    struct Node *head = NULL;
+    int arr2[] = {4, 9, 3, 1, 15, 6, 7, 9, 15, 15, 15, 15};
+    head = CreateFromArrayByInsert(arr2, sizeof(arr2) / sizeof(arr2[0]));
+    PrintRecursive(head);
+    struct Node *headSorted = NULL;
+    std::cout << "is sorted=" << IsSorted(head) << std::endl;
+    headSorted = CreateSortedFromArray(arr2, sizeof(arr2) / sizeof(arr2[0]));
+    PrintRecursive(headSorted);
+    headSorted = InsertSorted(headSorted, 11);
+    std::cout << "is sorted=" << IsSorted(headSorted) << std::endl;
+    PrintRecursive(headSorted);
+    headSorted = Delete(headSorted, 0);
+    PrintRecursive(headSorted);
+    printf("!!\n");
+    headSorted = DeleteLast(headSorted);
+    PrintRecursive(headSorted);
+    RemoveDuplicatesFormSorted(headSorted);
+    PrintRecursive(headSorted);
+    printf("!!\n");
+    ReverseByMoveData(headSorted);
+    PrintRecursive(headSorted);
+    FreeLinkedList(headSorted);
+    PrintRecursive(headSorted);
+
+    int arr3[] = {1, 2, 3};
+    headSorted = CreateSortedFromArray(arr3, sizeof(arr3) / sizeof(arr3[0]));
+    PrintRecursive(headSorted);
+    headSorted = ReverseByMoveLinksRecursive(NULL, headSorted);
+    PrintRecursive(headSorted);
+
+    FreeLinkedList(headSorted);
+    PrintRecursive(headSorted);
+
+    // Concat
+    int arr4[] = {1, 2, 3};
+    struct Node *headSorted4 = CreateSortedFromArray(arr4, sizeof(arr4) / sizeof(arr4[0]));
+    PrintRecursive(headSorted4);
+    int arr5[] = {11, 12, 13};
+    struct Node *headSorted5 = CreateSortedFromArray(arr5, sizeof(arr5) / sizeof(arr5[0]));
+    PrintRecursive(headSorted5);
+    headSorted4 = Concat(headSorted4, headSorted5);
+    PrintRecursive(headSorted4);
+
+    // Merge sorted
+    int arr6[] = {1, 12, 13};
+    struct Node *headSorted6 = CreateSortedFromArray(arr6, sizeof(arr6) / sizeof(arr6[0]));
+    PrintRecursive(headSorted6);
+    int arr7[] = {8, 9, 18};
+    struct Node *headSorted7 = CreateSortedFromArray(arr7, sizeof(arr7) / sizeof(arr7[0]));
+    PrintRecursive(headSorted7);
+    struct Node *headSorted8 = MergeSorted(headSorted6, headSorted7);
+    PrintRecursive(headSorted8);
+
+    // Looped LL
+    int arr9[] = {1, 12, 13, 15};
+    struct Node *headSorted9 = CreateSortedFromArray(arr9, sizeof(arr9) / sizeof(arr9[0]));
+    std::cout << "LL is looped: " << IsLoop(headSorted9) << std::endl;
+    MakeLoop(headSorted9, 1);
+    std::cout << "LL is looped: " << IsLoop(headSorted9) << std::endl;
+
+    return 0;
+}
